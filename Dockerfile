@@ -9,8 +9,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
-COPY ./app ./app
+COPY ./src ./src
 COPY .env .
 
 # Default command
-ENTRYPOINT ["fastapi", "run", "app/main.py", "--workers", "4", "--port", "3210"]
+ENTRYPOINT ["fastapi", "run", "src/main.py", "--workers", "4", "--port", "3210"]
