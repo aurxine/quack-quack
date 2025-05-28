@@ -37,6 +37,20 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None
 )
+
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or list of specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
 @app.get(settings.BASE_URL + "/login", include_in_schema=False, response_class=HTMLResponse)
 async def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request, "base_url": settings.BASE_URL})
