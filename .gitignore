@@ -130,3 +130,6 @@ ENV/
 env/
 env.bak/
 venv.bak/
+
+# Local configuration files
+secrets/
