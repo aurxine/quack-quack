@@ -7,7 +7,6 @@ from pydantic_settings import BaseSettings
 
 from src.core.logger import logger
 
-logger = logging.getLogger(__name__)
 
 try:
     load_dotenv()
@@ -20,6 +19,25 @@ class Config(BaseSettings):
     VERSION: str = os.getenv("VERSION", "")
     ENV: str = os.getenv("ENV", "prod")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    BASE_URL: str = os.getenv(f"BASE_URL_{os.getenv('ENV', 'prod')}", "/")
+    SWAGGER_USERNAME: str = os.getenv("SWAGGER_USERNAME", "")
+    SWAGGER_PASSWORD: str = os.getenv("SWAGGER_PASSWORD", "")
+
+    def __str__(self):
+        return (
+            f"Config("
+            f"APP_NAME={self.APP_NAME!r}, "
+            f"VERSION={self.VERSION!r}, "
+            f"ENV={self.ENV!r}, "
+            f"LOG_LEVEL={self.LOG_LEVEL!r}, "
+            f"BASE_URL={self.BASE_URL!r}, "
+            f"SWAGGER_USERNAME={self.SWAGGER_USERNAME!r}, "
+            f"SWAGGER_PASSWORD={'***' if self.SWAGGER_PASSWORD else ''}"
+            f")"
+        )
+
+    def __repr__(self):
+        return self.__str__()
     
 
 def get_config() -> Config:
