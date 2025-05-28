@@ -1,0 +1,15 @@
+services:
+  quackquack-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: quackquack-backend:v0.0.1
+    container_name: QuackQuackBackend
+    env_file:
+      - .env
+    environment:
+      - LOG_LEVEL=DEBUG
+      - DEBUG=True
+      - TZ=Asia/Dhaka
+    volumes:
+      - ./logs:/code/logs
