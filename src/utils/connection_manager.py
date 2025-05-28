@@ -1,23 +1,28 @@
 from fastapi import WebSocket
 from typing import List
+import random
+
+def random_color():
+    # Generate a random hex color
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: dict[WebSocket, str] = {}  # WebSocket -> color
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections[websocket] = random_color()
 
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        self.active_connections.pop(websocket, None)
 
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-    async def broadcast(self, message: str):
+    async def broadcast(self, message: str, sender: WebSocket):
+        color = self.active_connections.get(sender, "#000000")
         for connection in self.active_connections:
-            await connection.send_text(message)
+            await connection.send_json({"message": message, "color": color})
 
-def get_connection_manager():
-    return ConnectionManager()
+
+
+# Shared singleton instance
+manager = ConnectionManager()
