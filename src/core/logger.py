@@ -2,11 +2,9 @@ import logging
 import logging.config
 import os
 import queue
-import sys
 from contextvars import ContextVar
 from logging import FileHandler, StreamHandler
-from logging.handlers import QueueListener, QueueHandler
-from typing import Any
+from logging.handlers import QueueListener
 
 # Constants
 REQUEST_ID_VAR = ContextVar("request_id", default="system")
@@ -47,6 +45,19 @@ class RequestIdFilter(logging.Filter):
 
 class SingleLineFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
+        if (record.name == 'uvicorn.error' and 'startup' in record.msg.lower()):
+            record.name = 'uvicorn.startup'
+            record.levelno = logging.DEBUG
+            record.levelname = 'DEBUG'
+            
+        elif (record.name == 'uvicorn.error' and 'shutdown' in record.msg.lower()):
+            record.name = 'uvicorn.shutdown'
+            record.levelno = logging.DEBUG
+            record.levelname = 'DEBUG'
+        elif record.name == 'uvicorn.error':
+            record.name = 'uvicorn.debug'
+            record.levelno = logging.DEBUG
+            record.levelname = 'DEBUG'
         original = super().format(record)
         return original.replace("\n", " | ")
 

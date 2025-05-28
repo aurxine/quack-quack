@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
     image: quackquack-backend:v0.0.1
     container_name: QuackQuackBackend
+    network_mode: bridge
+    ports:
+      - "3210:3210"
     env_file:
       - .env
     environment:
