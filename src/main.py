@@ -82,4 +82,4 @@ async def status():
     logger.info(f"Response sent: {response}")
     return response
 
-app.include_router(websocket_routes.router)
+app.include_router(websocket_routes.router, prefix=settings.BASE_URL, tags=["Chat WebSocket"])
