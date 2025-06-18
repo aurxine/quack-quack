@@ -7,7 +7,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from src.api.v1 import websocket_routes
+from src.api.v1 import websocket_routes, auth_routes
 from src.core.config import get_config
 from src.core.logger import logger, shutdown_logging
 
@@ -53,7 +53,7 @@ app.add_middleware(
 
 @app.get(settings.BASE_URL + "/login", include_in_schema=False, response_class=HTMLResponse)
 async def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request, "base_url": settings.BASE_URL})
+    return templates.TemplateResponse("swagger_login.html", {"request": request, "base_url": settings.BASE_URL})
 
 
 # Login POST endpoint: validates credentials and then redirects with them in the URL.
@@ -97,3 +97,4 @@ async def status():
     return response
 
 app.include_router(websocket_routes.router, prefix=settings.BASE_URL, tags=["Chat WebSocket"])
+app.include_router(auth_routes.router, prefix=settings.BASE_URL + "/auth", tags=["Auth"])

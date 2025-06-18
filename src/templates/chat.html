@@ -12,40 +12,50 @@
 </head>
 <body>
   <h2>WebSocket Chat Room</h2>
-  <div id="chat-box" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
-  <input type="text" id="message" placeholder="Type your message here..." />
-  <button id="send">Send</button>
+<button onclick="logout()" style="float: right;">Logout</button>
+<div id="chat-box"></div>
+<input type="text" id="message" placeholder="Type your message..." />
+<button id="send">Send</button>
 
-  <script>
-    const ws = new WebSocket(`ws://${location.host}/quackquack/ws/chat`);
-    const chatBox = document.getElementById("chat-box");
-    const input = document.getElementById("message");
+<script>
+  const token = localStorage.getItem("session_token");
+  if (!token) {
+    window.location.href = "/quackquack/login";
+  }
 
-    ws.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        const messageElement = document.createElement("div");
-        messageElement.textContent = data.message;
-        messageElement.style.color = data.color;
-        messageElement.style.fontWeight = "bold";
-        messageElement.style.margin = "5px 0";
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;  // auto scroll
-    };
+  const ws = new WebSocket(`ws://${location.host}/quackquack/ws/chat`);
+  const chatBox = document.getElementById("chat-box");
+  const input = document.getElementById("message");
 
-    function sendMessage() {
-        if (input.value.trim() !== "") {
-            ws.send(input.value.trim());
-            input.value = "";
-        }
+  ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    const messageElement = document.createElement("div");
+    messageElement.textContent = data.message;
+    messageElement.style.color = data.color;
+    messageElement.style.fontWeight = "bold";
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  };
+
+  function sendMessage() {
+    if (input.value.trim()) {
+      ws.send(input.value.trim());
+      input.value = "";
     }
+  }
 
-    document.getElementById("send").addEventListener("click", sendMessage);
+  document.getElementById("send").addEventListener("click", sendMessage);
+  input.addEventListener("keydown", e => e.key === "Enter" && sendMessage());
 
-    input.addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-            sendMessage();
-        }
+  async function logout() {
+    const res = await fetch("/quackquack/auth/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_token: token })
     });
+    localStorage.removeItem("session_token");
+    window.location.href = "/quackquack/login";
+  }
 </script>
 
 

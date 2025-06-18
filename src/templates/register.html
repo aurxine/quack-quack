@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login</title>
+  <title>Register</title>
   <style>
     body { font-family: Arial; background: #f2f2f2; padding: 20px; }
     .box { background: white; padding: 20px; max-width: 300px; margin: auto; border-radius: 8px; }
@@ -12,28 +12,28 @@
 </head>
 <body>
   <div class="box">
-    <h2>Login</h2>
+    <h2>Register</h2>
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <a href="/quackquack/register">Register instead</a>
+    <button onclick="register()">Register</button>
+    <a href="/quackquack/login">Already have an account? Login</a>
   </div>
 
   <script>
-    async function login() {
+    async function register() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const res = await fetch("/quackquack/auth/login", {
+      const res = await fetch("/quackquack/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem("session_token", data.session_token);
-        window.location.href = "/quackquack/chat";
+        alert("Registration successful. Redirecting to login...");
+        window.location.href = "/quackquack/login";
       } else {
-        alert(data.detail || "Login failed");
+        alert(data.detail || "Registration failed");
       }
     }
   </script>
