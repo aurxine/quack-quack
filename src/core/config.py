@@ -24,6 +24,7 @@ class Config(BaseSettings):
     SWAGGER_PASSWORD: str = os.getenv("SWAGGER_PASSWORD", "")
 
     FIREBASE_CREDENTIALS_PATH: str = os.getenv("FIREBASE_CREDENTIALS_PATH", "")
+    logger.info(f"FIREBASE_CREDENTIALS_PATH: {FIREBASE_CREDENTIALS_PATH}")
 
 
     REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
