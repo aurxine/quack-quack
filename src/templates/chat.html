@@ -23,7 +23,7 @@
     window.location.href = "/quackquack/login";
   }
 
-  const ws = new WebSocket(`ws://${location.host}/quackquack/ws/chat`);
+  const ws = new WebSocket(`ws://${location.host}/quackquack/ws/chat?token=${token}`);
   const chatBox = document.getElementById("chat-box");
   const input = document.getElementById("message");
 
