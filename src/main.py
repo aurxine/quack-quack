@@ -52,13 +52,13 @@ app.add_middleware(
 
 
 
-@app.get(settings.BASE_URL + "/login", include_in_schema=False, response_class=HTMLResponse)
+@app.get(settings.BASE_URL + "/docs/login", include_in_schema=False, response_class=HTMLResponse)
 async def login_form(request: Request):
     return templates.TemplateResponse("swagger_login.html", {"request": request, "base_url": settings.BASE_URL})
 
 
 # Login POST endpoint: validates credentials and then redirects with them in the URL.
-@app.post(settings.BASE_URL + "/login", include_in_schema=False)
+@app.post(settings.BASE_URL + "/docs/login", include_in_schema=False)
 async def login(username: str = Form(...), password: str = Form(...)):
     correct_username = os.getenv("SWAGGER_USERNAME", "")
     correct_password = os.getenv("SWAGGER_PASSWORD", "")
@@ -86,7 +86,7 @@ async def get_swagger_documentation(username: str = Query(None), password: str =
         raise HTTPException(status_code=500, detail="Swagger cannot be accessed right now")
     
     if username != correct_username or password != correct_password:
-        return RedirectResponse(url=settings.BASE_URL + "/login")
+        return RedirectResponse(url=settings.BASE_URL + "/docs/login")
     
     openapi_url = app.openapi_url or "/openapi.json"
     return get_swagger_ui_html(openapi_url=openapi_url, title=app.title + " - Swagger UI")
@@ -96,6 +96,24 @@ async def status():
     response = {"message": "Good Day! Everything is up and running :)"}
     logger.info(f"Response sent: {response}")
     return response
+
+
+@app.get(settings.BASE_URL + "/register", include_in_schema=False, response_class=HTMLResponse)
+async def register_page(request: Request):
+    logger.info("Rendering register page")
+    return templates.TemplateResponse("register.html", {"request": request})
+
+
+@app.get(settings.BASE_URL + "/login", include_in_schema=False, response_class=HTMLResponse)
+async def user_login_page(request: Request):
+    logger.info("Rendering user login page")
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.get(settings.BASE_URL + "/chat", include_in_schema=False, response_class=HTMLResponse)
+async def chat_page(request: Request):
+    logger.info("Rendering chat page")
+    return templates.TemplateResponse("chat.html", {"request": request})
 
 app.include_router(websocket_routes.router, prefix=settings.BASE_URL, tags=["Chat WebSocket"])
 app.include_router(auth_routes.router, prefix=settings.BASE_URL + "/auth", tags=["Auth"])
