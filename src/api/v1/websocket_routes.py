@@ -1,20 +1,27 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from src.utils.connection_manager import manager
-from src.services.chat_manager import process_message
+from fastapi import APIRouter, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from fastapi import Request
+
+from src.core.redis import redis_client
+from src.services.chat_manager import process_message
+from src.utils.connection_manager import manager
 
 router = APIRouter()
 
 @router.websocket("/ws/chat")
-async def chat_websocket(websocket: WebSocket):
-    await manager.connect(websocket)
+async def chat_websocket(websocket: WebSocket, token: str = Query(...)):
+    user_id = redis_client.get(f"session:{token}")
+    if not user_id:
+        await websocket.close(code=1008)
+        return
+
+    await manager.connect(websocket, user_id) # type: ignore
     try:
         while True:
             data = await websocket.receive_text()
             await manager.broadcast(data, sender=websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
 
 
 @router.get("/chat", include_in_schema=False)
