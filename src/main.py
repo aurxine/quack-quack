@@ -7,7 +7,8 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from src.api.v1 import websocket_routes, auth_routes
+from src.api.v1 import auth_routes, websocket_routes
+from src.core import firebase
 from src.core.config import get_config
 from src.core.logger import logger, shutdown_logging
 
