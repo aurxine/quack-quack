@@ -8,19 +8,26 @@ def random_color():
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[WebSocket, str] = {}  # WebSocket -> color
+        self.active_connections: dict[WebSocket, dict] = {}  # WebSocket -> {"color": str, "user_id": str}
 
-    async def connect(self, websocket: WebSocket):
+    async def connect(self, websocket: WebSocket, user_id: str):
         await websocket.accept()
-        self.active_connections[websocket] = random_color()
+        self.active_connections[websocket] = {
+            "color": random_color(),
+            "user_id": user_id,
+        }
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.pop(websocket, None)
 
     async def broadcast(self, message: str, sender: WebSocket):
-        color = self.active_connections.get(sender, "#000000")
+        sender_meta = self.active_connections.get(sender, {"color": "#000000", "user_id": "unknown"})
         for connection in self.active_connections:
-            await connection.send_json({"message": message, "color": color})
+            await connection.send_json({
+                "message": f"{sender_meta['user_id']}: {message}",
+                "color": sender_meta["color"]
+            })
+
 
 
 
