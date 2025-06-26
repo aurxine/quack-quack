@@ -10,13 +10,25 @@ from fastapi.templating import Jinja2Templates
 from src.api.v1 import auth_routes, websocket_routes
 from src.core import firebase
 from src.core.config import get_config
-from src.core.logger import logger, shutdown_logging
+from src.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 templates = Jinja2Templates(directory="src/templates")
 
 
 settings = get_config()
 
+async def shutdown_logging():
+    # Cleanup logger resources
+    try:
+        # Get all logger instances and shut them down gracefully
+        from src.core.logger import Logger
+        for instance in Logger._instances.values():
+            instance.shutdown()
+        logger.info("Logger resources cleaned up successfully")
+    except Exception as e:
+        print(f"Error during logger cleanup: {e}", file=sys.stderr)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
