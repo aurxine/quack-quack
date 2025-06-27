@@ -19,19 +19,22 @@ async def chat_websocket(websocket: WebSocket, token: str = Query(...)):
         await websocket.close(code=1008)
         return
 
-    await manager.connect(websocket, user_id) # type: ignore
-    logger.info(f"User {user_id} connected via WebSocket.")
+    # Get username for the user
+    username = redis_client.get(f"user:{user_id}:username")
+    if not username:
+        username = user_id  # Fallback to user_id if username not found
+    
+    await manager.connect(websocket, user_id, username) # type: ignore
+    logger.info(f"User {username} (ID: {user_id}) connected via WebSocket.")
     try:
         while True:
             data = await websocket.receive_text()
-            logger.debug(f"Received message from user {user_id}: {data}")
+            logger.debug(f"Received message from user {username}: {data}")
             await manager.broadcast(data, sender=websocket)
-            logger.debug(f"Broadcasted message from user {user_id}")
+            logger.debug(f"Broadcasted message from user {username}")
     except WebSocketDisconnect:
-        logger.info(f"User {user_id} disconnected from WebSocket.")
+        logger.info(f"User {username} (ID: {user_id}) disconnected from WebSocket.")
         manager.disconnect(websocket)
-
-
 
 @router.get("/chat", include_in_schema=False)
 async def chat_page(request: Request):

@@ -4,6 +4,7 @@ import random
 from src.core.logger import get_logger
 
 logger = get_logger(__name__)
+
 def random_color():
     # Generate a random hex color
     color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
@@ -12,17 +13,18 @@ def random_color():
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[WebSocket, dict] = {}  # WebSocket -> {"color": str, "user_id": str}
+        self.active_connections: dict[WebSocket, dict] = {}  # WebSocket -> {"color": str, "user_id": str, "username": str}
         logger.debug("Initialized ConnectionManager with empty active_connections.")
 
-    async def connect(self, websocket: WebSocket, user_id: str):
+    async def connect(self, websocket: WebSocket, user_id: str, username: str):
         await websocket.accept()
         color = random_color()
         self.active_connections[websocket] = {
             "color": color,
             "user_id": user_id,
+            "username": username,
         }
-        logger.debug(f"WebSocket {websocket} connected with user_id: {user_id}, color: {color}.")
+        logger.debug(f"WebSocket {websocket} connected with user_id: {user_id}, username: {username}, color: {color}.")
         logger.debug(f"Current active connections: {len(self.active_connections)}")
 
     def disconnect(self, websocket: WebSocket):
@@ -34,12 +36,12 @@ class ConnectionManager:
         logger.debug(f"Current active connections: {len(self.active_connections)}")
 
     async def broadcast(self, message: str, sender: WebSocket):
-        sender_meta = self.active_connections.get(sender, {"color": "#000000", "user_id": "unknown"})
-        logger.debug(f"Broadcasting message from user_id: {sender_meta['user_id']} with color: {sender_meta['color']}")
+        sender_meta = self.active_connections.get(sender, {"color": "#000000", "user_id": "unknown", "username": "unknown"})
+        logger.debug(f"Broadcasting message from username: {sender_meta['username']} with color: {sender_meta['color']}")
         for connection in self.active_connections:
             try:
                 await connection.send_json({
-                    "message": f"{sender_meta['user_id']}: {message}",
+                    "message": f"{sender_meta['username']}: {message}",
                     "color": sender_meta["color"]
                 })
                 logger.debug(f"Sent message to WebSocket {connection}")
